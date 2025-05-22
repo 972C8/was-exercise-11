@@ -57,7 +57,7 @@ manifest_goal_description([2,3]).
   // Calculate Q for all training goal descriptions. Use fewer if you want to speed up the learning process.
   for ( .member([Z1Level,Z2Level],GoalDescriptionList) ) {
     .print("New goal description: Z1Level=", Z1Level, " and Z2Level=",Z2Level);
-    calculateQ([Z1Level,Z2Level], 150, 0.2, 0.9, 0.3, 100, ManifestGoalDescriptionInRealLab)[artifact_id(QLArtId)];
+    calculateQ([Z1Level,Z2Level], 3, 0.2, 0.9, 0.3, 100, ManifestGoalDescriptionInRealLab)[artifact_id(QLArtId)];
   }
   
   // Create a ThingArtifact for the simulated (or real) lab environment
@@ -76,25 +76,75 @@ manifest_goal_description([2,3]).
   -+manifest_goal_description_success(false);
   for ( .range(I,1,10) & manifest_goal_description_success(TrueFalse) & TrueFalse == false ) {
 
-    System.out.println("-------------------------------");
+    .print("-------------------------------");
     .print("Attempting with Try #", I);
 
     readProperty("https://example.org/was#Status", Key, Value)[artifact_id(LabArtId)];
 
+    // Debug print to see the exact structure
+    //.print("Key=", Key, " Value=", Value);
+
+    /*
+    TYPICAL RESPONSE FOR SIMULATED LAB:
+
+    Key=[
+    "http://example.org/was#Z2Level",
+    "http://example.org/was#EnergyCost",
+    "http://example.org/was#Z1Blinds",
+    "http://example.org/was#Hour",
+    "http://example.org/was#Sunshine",
+    "http://example.org/was#Z2Light",
+    "http://example.org/was#Z1Light",
+    "http://example.org/was#TotalEnergyCost",
+    "http://example.org/was#Z2Blinds",
+    "http://example.org/was#Z1Level"]
+    Value=[
+    484.4003606632392,
+    5,
+    true,
+    16.19999999999996,
+    616.645120521592,
+    false,
+    false,
+    1012,
+    true,
+    484.4003606632392
+    ]
+    */
+
+    /*
+    Typical response for real lab: -> Hour is missing, which shifts the indeces!!
+    Key=[
+    "http://example.org/was#Z2Level",
+    "http://example.org/was#EnergyCost",
+    "http://example.org/was#Z1Blinds",
+    "http://example.org/was#Sunshine",
+    "http://example.org/was#Z2Light",
+    "http://example.org/was#Z1Light",
+    "http://example.org/was#TotalEnergyCost",
+    "http://example.org/was#Z2Blinds",
+    "http://example.org/was#Z1Level"]
+    Value=[
+    86.66666412,
+    100,
+    false,
+    301.92,
+    true,
+    false,
+    703651,
+    false,
+    149.1666565]
+    */
+
     // Parse the values from the response according to the value in ManifestGoalDescriptionInRealLabBoolean variable.
     if (ManifestGoalDescriptionInRealLab) {
       .nth(0, Value, Z2Level);
-      .nth(1, Value, Z1Blinds);
-      .nth(2, Value, Sunshine);
-      .nth(3, Value, Z2Light);
-      .nth(4, Value, Z1Light);
-      .nth(5, Value, Z2Blinds);
-      .nth(6, Value, Z1Level);
-
-      // Convert values to numeric if needed
-      .number(Z1Level, Z1LevelNum);
-      .number(Z2Level, Z2LevelNum);
-      .number(Sunshine, SunshineNum);
+      .nth(2, Value, Z1Blinds);
+      .nth(3, Value, Sunshine);
+      .nth(4, Value, Z2Light);
+      .nth(5, Value, Z1Light);
+      .nth(7, Value, Z2Blinds);
+      .nth(8, Value, Z1Level);
 
       .print("Z1Level=", Z1Level, " Z2Level=", Z2Level, " Z1Blinds=", Z1Blinds, " Sunshine=", Sunshine, " Z2Light=", Z2Light, " Z1Light=", Z1Light, " Z2Blinds=", Z2Blinds);
     } else {
@@ -106,11 +156,6 @@ manifest_goal_description([2,3]).
       .nth(5, Value, Z1Light);
       .nth(6, Value, Z2Blinds);
       .nth(7, Value, Z1Level);
-
-      // Convert values to numeric if needed
-      .number(Z1Level);
-      .number(Z2Level);
-      .number(Sunshine);
 
       .print("Z1Level=", Z1Level, " Z2Level=", Z2Level, " Z1Blinds=", Z1Blinds, " Hour=", Hour, " Sunshine=", Sunshine, " Z2Light=", Z2Light, " Z1Light=", Z1Light, " Z2Blinds=", Z2Blinds);
     }
@@ -128,27 +173,30 @@ manifest_goal_description([2,3]).
       .print("Manifestation successful. Z1Level=", DiscretizedZ1Level, " Z2Level=", DiscretizedZ2Level, " ManifestGoalDescriptionZ1Level=", ManifestGoalDescriptionZ1Level, " ManifestGoalDescriptionZ2Level=", ManifestGoalDescriptionZ2Level);
       -+manifest_goal_description_success(true);
     } else {
+      //TODO: fix issue that the values are not boolean
+
       // Convert values to boolean before passing to getActionFromState
-      .eval(Z1LightBool, Z1Light == "true" | Z1Light == 1);
-      .eval(Z2LightBool, Z2Light == "true" | Z2Light == 1);
-      .eval(Z1BlindsBool, Z1Blinds == "true" | Z1Blinds == 1);
-      .eval(Z2BlindsBool, Z2Blinds == "true" | Z2Blinds == 1);
+      // .eval(Z1LightBool, Z1Light == "true" | Z1Light == 1);
+      // .eval(Z2LightBool, Z2Light == "true" | Z2Light == 1);
+      // .eval(Z1BlindsBool, Z1Blinds == "true" | Z1Blinds == 1);
+      // .eval(Z2BlindsBool, Z2Blinds == "true" | Z2Blinds == 1);
 
       getActionFromState(ManifestGoalDescription, 
                         [DiscretizedZ1Level,
                          DiscretizedZ2Level,
-                         Z1LightBool,
-                         Z2LightBool,
-                         Z1BlindsBool,
-                         Z2BlindsBool,
+                         Z1Light,
+                         Z2Light,
+                         Z1Blinds,
+                         Z2Blinds,
                          DiscretizedSunshine], 
                         ActionTag, PayloadTags, Payload);
 
-      .print("Manifestation failed. Retrying action with ActionTag=", ActionTag, " PayloadTags=", PayloadTags, " Payload=", Payload);
+      .print("Manifestation not yet as desired. Performing next action with ActionTag=", ActionTag, " PayloadTags=", PayloadTags, " Payload=", Payload);
       invokeAction(ActionTag, PayloadTags, Payload)[artifact_id(LabArtId)];
       
       // Wait until executing the next action. Make sure to wait longer in the real lab (60s vs. 1s)
       if (ManifestGoalDescriptionInRealLab) {
+        .print("Waiting 60s for the action to be executed in the real lab.");
         .wait(60000);
       } else {
         .wait(1000);
