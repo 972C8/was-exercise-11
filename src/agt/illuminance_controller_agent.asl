@@ -176,18 +176,18 @@ manifest_goal_description([2,3]).
       //TODO: fix issue that the values are not boolean
 
       // Convert values to boolean before passing to getActionFromState
-      // .eval(Z1LightBool, Z1Light == "true" | Z1Light == 1);
-      // .eval(Z2LightBool, Z2Light == "true" | Z2Light == 1);
-      // .eval(Z1BlindsBool, Z1Blinds == "true" | Z1Blinds == 1);
-      // .eval(Z2BlindsBool, Z2Blinds == "true" | Z2Blinds == 1);
+      .eval(Z1LightBool, Z1Light == "true" | Z1Light == 1);
+      .eval(Z2LightBool, Z2Light == "true" | Z2Light == 1);
+      .eval(Z1BlindsBool, Z1Blinds == "true" | Z1Blinds == 1);
+      .eval(Z2BlindsBool, Z2Blinds == "true" | Z2Blinds == 1);
 
       getActionFromState(ManifestGoalDescription, 
                         [DiscretizedZ1Level,
                          DiscretizedZ2Level,
-                         Z1Light,
-                         Z2Light,
-                         Z1Blinds,
-                         Z2Blinds,
+                         Z1LightBool,
+                         Z2LightBool,
+                         Z1BlindsBool,
+                         Z2BlindsBool,
                          DiscretizedSunshine], 
                         ActionTag, PayloadTags, Payload);
 
